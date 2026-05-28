@@ -39,16 +39,16 @@ function getStatusIcons(actual, probable) {
   const badges = [];
   if (actual) {
     const a = actual.trim().toUpperCase();
-    if (a === 'PASS') badges.push('<span class="badge-premium badge-act-pass">ACTUAL: PASS</span>');
-    else if (a === 'WL' || a === 'WATCH LIST') badges.push('<span class="badge-premium badge-act-wl">ACTUAL: WATCH LIST</span>');
-    else if (a === 'NPA') badges.push('<span class="badge-premium badge-act-npa">ACTUAL: NPA</span>');
+    if (a.includes('PASS')) badges.push('<span class="badge-premium badge-act-pass">ACTUAL: PASS</span>');
+    else if (a.includes('WL') || a.includes('WATCH')) badges.push('<span class="badge-premium badge-act-wl">ACTUAL: WATCH LIST</span>');
+    else if (a.includes('NPA')) badges.push('<span class="badge-premium badge-act-npa">ACTUAL: NPA</span>');
     else if (a) badges.push(`<span class="badge-premium" style="background:#334155; color:white;">ACTUAL: ${a}</span>`);
   }
   if (probable) {
     const p = probable.trim().toUpperCase();
-    if (p === 'PASS') badges.push('<span class="badge-premium badge-prob-pass">PROBABLE: PASS</span>');
-    else if (p === 'WL' || p === 'WATCH LIST') badges.push('<span class="badge-premium badge-prob-wl">PROBABLE: WATCH LIST</span>');
-    else if (p === 'NPA') badges.push('<span class="badge-premium badge-prob-npa">PROBABLE: NPA</span>');
+    if (p.includes('NPA')) badges.push('<span class="badge-premium badge-prob-npa">PROBABLE: NPA</span>');
+    else if (p.includes('WL') || p.includes('WATCH')) badges.push('<span class="badge-premium badge-prob-wl">PROBABLE: WATCH LIST</span>');
+    else if (p.includes('PASS')) badges.push('<span class="badge-premium badge-prob-pass">PROBABLE: PASS</span>');
     else if (p) badges.push(`<span class="badge-premium" style="background:#475569; color:white;">PROBABLE: ${p}</span>`);
   }
   return badges.join('&nbsp;');
