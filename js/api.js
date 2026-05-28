@@ -1,4 +1,6 @@
 const API_BASE = (() => {
+  const stored = localStorage.getItem('crm_api_base');
+  if (stored) return stored;
   const url = new URL(window.location.href);
   return url.origin + url.pathname;
 })();
