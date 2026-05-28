@@ -20,20 +20,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
-  <!-- Styles from GitHub CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/css/styles.css">
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
 
-  <!-- Scripts from GitHub CDN (loaded in order) -->
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/db.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/api.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/ui.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/auth.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/views/group.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/views/insights.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/views/detail.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/views/gps.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/views/reminders.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/gh/matchingmushroom/behind@main/js/main.js"></script>
+  <!-- Scripts (loaded in order) -->
+  <script defer src="js/db.js"></script>
+  <script defer src="js/api.js"></script>
+  <script defer src="js/ui.js"></script>
+  <script defer src="js/auth.js"></script>
+  <script defer src="js/views/group.js"></script>
+  <script defer src="js/views/insights.js"></script>
+  <script defer src="js/views/detail.js"></script>
+  <script defer src="js/views/gps.js"></script>
+  <script defer src="js/views/reminders.js"></script>
+  <script defer src="js/main.js"></script>
 </head>
 <body>
 
@@ -165,8 +165,8 @@
         <div class="stat-grid" id="detail-metrics-grid">
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance_wallet</i><span class="stat-card-lbl">Net Overdue</span></div><div class="stat-card-val neg-val" id="v-net-ovd">Rs 0.00</div></div>
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">request_quote</i><span class="stat-card-lbl">Total Overdue</span></div><div class="stat-card-val" id="v-tot-ovd">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">security</i><span class="stat-card-lbl">NPA Saver</span></div><div class="stat-card-val neg-val" id="v-npa">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">health_and_safety</i><span class="stat-card-lbl">WL Saver</span></div><div class="stat-card-val warn-val" id="v-wl">Rs 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">security</i><span class="stat-card-lbl">NPA Saver</span></div><div class="stat-card-val" id="v-npa">Rs 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">health_and_safety</i><span class="stat-card-lbl">WL Saver</span></div><div class="stat-card-val" id="v-wl">Rs 0.00</div></div>
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">event_busy</i><span class="stat-card-lbl">OVD Days</span></div><div class="stat-card-val" id="v-days">0</div></div>
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance</i><span class="stat-card-lbl">Total Loan</span></div><div class="stat-card-val" id="v-loan">Rs 0.00</div></div>
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">savings</i><span class="stat-card-lbl">Op. Balance</span></div><div class="stat-card-val" id="v-op">Rs 0.00</div></div>

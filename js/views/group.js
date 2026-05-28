@@ -68,8 +68,8 @@ function renderGroup(d) {
         <div class="member-card-body">
           <div class="member-metric-row"><span class="metric-lbl">Total Overdue</span><span class="member-metric-val">${fAmt(u.totalOvd)}</span></div>
           <div class="member-metric-row" style="text-align:right;"><span class="metric-lbl">Net Overdue</span><span class="member-metric-val" style="color:var(--danger);">${fAmt(u.totalNetOvd)}</span></div>
-          <div class="member-metric-row"><span class="metric-lbl">NPA Saver</span><span class="member-metric-val" style="color:var(--danger);">${fAmt(u.minNpa)}</span></div>
-          <div class="member-metric-row" style="text-align:right;"><span class="metric-lbl">WL Saver</span><span class="member-metric-val" style="color:var(--warning);">${fAmt(u.minWl)}</span></div>
+          <div class="member-metric-row"><span class="metric-lbl">NPA Saver</span><span class="member-metric-val">${fAmt(u.minNpa)}</span></div>
+          <div class="member-metric-row" style="text-align:right;"><span class="metric-lbl">WL Saver</span><span class="member-metric-val">${fAmt(u.minWl)}</span></div>
         </div>
         <div id="disc-${u.name.replace(/[^a-zA-Z0-9]/g, '_')}"></div>
       </div>

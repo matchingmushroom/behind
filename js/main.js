@@ -160,8 +160,8 @@ async function loadLocalDetailPortfolioTable() {
             ${a.FULL_RATE}%
           </span>
         </td>
-        <td style="color:var(--danger); font-weight:700;">${fAmt(a.MIN_BAL_NPA)}</td>
-        <td style="color:var(--warning); font-weight:700;">${fAmt(a.MIN_BAL_WL)}</td>
+        <td style="font-weight:700;">${fAmt(a.MIN_BAL_NPA)}</td>
+        <td style="font-weight:700;">${fAmt(a.MIN_BAL_WL)}</td>
         <td style="font-weight:700;">${fAmt(a.NET_OVD)}</td>
       </tr>`;
   }).join('');

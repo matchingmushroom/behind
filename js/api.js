@@ -2,7 +2,10 @@ const API_BASE = (() => {
   const stored = localStorage.getItem('crm_api_base');
   if (stored) return stored;
   const url = new URL(window.location.href);
-  return url.origin + url.pathname;
+  if (url.origin.includes('google.com') || url.origin.includes('googleusercontent.com')) {
+    return url.origin + url.pathname;
+  }
+  return 'https://script.google.com/macros/s/AKfycbwbSvJ8jRda8PHkMV8KwTwL0p8iqUI9FxQp6cSZCQiLjNOkmQC1FuUo4CJqwyK356GALQ/exec';
 })();
 
 const _pendingRequests = {};
