@@ -1,5 +1,5 @@
 const CACHE_NAME = 'overdue-crm-v3';
-const CDN_BASE = 'https://cdn.jsdelivr.net/gh/matchingmushroom/behind@89042eb';
+const CDN_BASE = 'https://cdn.jsdelivr.net/gh/matchingmushroom/behind@935cfd1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
