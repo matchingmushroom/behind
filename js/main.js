@@ -20,42 +20,7 @@ async function loadInitialCachedLedgers() {
 
 async function syncLedgerDataOnStart() {
   if (!navigator.onLine) return;
-  
-  try {
-    console.log("Initiating ledger sync via loadFullData...");
-    
-    const full = await callBackend('loadFullData');
-    if (full && full.customers) {
-      customers = full.customers;
-      
-      await crmDb.clearStore('customers');
-      await crmDb.clearStore('metrics');
-      await crmDb.clearStore('groups');
-      
-      for (const c of full.customers) {
-        await crmDb.put('customers', c);
-      }
-      for (const m of full.allMetrics) {
-        await crmDb.put('metrics', m);
-      }
-      for (const g of full.groups) {
-        await crmDb.put('groups', g);
-      }
-      
-      const cifMap = {};
-      full.customers.forEach(c => { cifMap[c.name] = c.id; });
-      await crmDb.putKV('name_to_cif', cifMap);
-      
-      await crmDb.putKV('last_full_sync', Date.now());
-      showToast('Ledger sync completed. All customer details cached offline.', 'success');
-      
-      const val = document.getElementById('searchInp').value;
-      triggerFuzzySearch(val);
-    }
-  } catch (e) {
-    console.warn("loadFullData failed, falling back to individual preloads", e);
-    loadCustomerListLegacy();
-  }
+  loadCustomerListLegacy();
 }
 
 async function loadCustomerListLegacy() {
