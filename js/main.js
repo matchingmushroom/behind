@@ -24,8 +24,8 @@ async function syncLedgerDataOnStart() {
 }
 
 async function loadCustomerListLegacy() {
+  toggleLoader(true);
   try {
-    toggleLoader(true);
     const data = await callBackend('customers');
     customers = data;
     await crmDb.clearStore('customers');
@@ -34,11 +34,11 @@ async function loadCustomerListLegacy() {
     }
     showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
   } catch(e) {
-    showToast('Could not load base ledger right now.', 'error');
     const cachedList = await crmDb.getAll('customers');
     if (cachedList.length > 0) {
       customers = cachedList;
-      showToast(`Loaded ${customers.length} records from cache.`, 'success');
+    } else {
+      showToast('Could not load base ledger right now.', 'error');
     }
   } finally {
     toggleLoader(false);
