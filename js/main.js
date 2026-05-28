@@ -20,11 +20,12 @@ async function loadInitialCachedLedgers() {
 
 async function syncLedgerDataOnStart() {
   if (!navigator.onLine) return;
-  loadCustomerListLegacy();
+  await loadCustomerListLegacy();
 }
 
 async function loadCustomerListLegacy() {
   try {
+    toggleLoader(true);
     const data = await callBackend('customers');
     customers = data;
     await crmDb.clearStore('customers');
@@ -32,9 +33,18 @@ async function loadCustomerListLegacy() {
       await crmDb.put('customers', c);
     }
     showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
-    triggerFuzzySearch('');
   } catch(e) {
     showToast('Could not load base ledger right now.', 'error');
+    const cachedList = await crmDb.getAll('customers');
+    if (cachedList.length > 0) {
+      customers = cachedList;
+      showToast(`Loaded ${customers.length} records from cache.`, 'success');
+    }
+  } finally {
+    toggleLoader(false);
+    const inp = document.getElementById('searchInp');
+    const query = inp ? inp.value : '';
+    triggerFuzzySearch(query);
   }
 }
 
@@ -224,7 +234,7 @@ async function renderSearchResultsGrid(list) {
     const card = document.createElement('div');
     const m = await crmDb.get('metrics', c.id);
     let cat = 'Pass';
-    let netOvdVal = 'रु 0.00';
+    let netOvdVal = 'Rs 0.00';
     let maxOvdDaysVal = 0;
     
     if (m) {

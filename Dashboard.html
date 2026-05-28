@@ -744,9 +744,9 @@
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
-    .badge-act-pass { background: #10B981; color: white; }
-    .badge-act-wl { background: #F59E0B; color: black; }
-    .badge-act-npa { background: #F43F5E; color: white; }
+    .badge-act-pass { background: #059669; color: white; }
+    .badge-act-wl { background: #EAB308; color: #000; }
+    .badge-act-npa { background: #DC2626; color: white; }
 
     /* Pagination */
     .pagination {
@@ -873,7 +873,7 @@
     <div class="kpi-icon"><i class="material-icons-round">request_quote</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total Overdue</span>
-      <span class="kpi-val" id="kpi-total-ovd">रु 0.00</span>
+      <span class="kpi-val" id="kpi-total-ovd">Rs 0.00</span>
       <span class="kpi-sub">Net Overdue</span>
     </div>
   </div>
@@ -881,7 +881,7 @@
     <div class="kpi-icon"><i class="material-icons-round">security</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total NPA</span>
-      <span class="kpi-val" id="kpi-npa-val">रु 0.00</span>
+      <span class="kpi-val" id="kpi-npa-val">Rs 0.00</span>
       <span class="kpi-sub" id="kpi-npa-count">0 CIFs</span>
     </div>
   </div>
@@ -889,7 +889,7 @@
     <div class="kpi-icon"><i class="material-icons-round">health_and_safety</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total WL</span>
-      <span class="kpi-val" id="kpi-wl-val">रु 0.00</span>
+      <span class="kpi-val" id="kpi-wl-val">Rs 0.00</span>
       <span class="kpi-sub" id="kpi-wl-count">0 CIFs</span>
     </div>
   </div>
@@ -897,7 +897,7 @@
     <div class="kpi-icon"><i class="material-icons-round">gpp_maybe</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total PNPA</span>
-      <span class="kpi-val" id="kpi-pnpa-val">रु 0.00</span>
+      <span class="kpi-val" id="kpi-pnpa-val">Rs 0.00</span>
       <span class="kpi-sub" id="kpi-pnpa-count">0 CIFs</span>
     </div>
   </div>
@@ -905,7 +905,7 @@
     <div class="kpi-icon"><i class="material-icons-round">help_outline</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total PWL</span>
-      <span class="kpi-val" id="kpi-pwl-val">रु 0.00</span>
+      <span class="kpi-val" id="kpi-pwl-val">Rs 0.00</span>
       <span class="kpi-sub" id="kpi-pwl-count">0 CIFs</span>
     </div>
   </div>
@@ -913,7 +913,7 @@
     <div class="kpi-icon"><i class="material-icons-round">check_circle</i></div>
     <div class="kpi-content">
       <span class="kpi-lbl">Total Pass</span>
-      <span class="kpi-val" id="kpi-pass-val">रु 0.00</span>
+      <span class="kpi-val" id="kpi-pass-val">Rs 0.00</span>
       <span class="kpi-sub" id="kpi-pass-count">0 CIFs</span>
     </div>
   </div>
@@ -1128,7 +1128,7 @@
   let relChartInstance = null;
   let topOvdInstance = null;
 
-  const fAmt = (n) => 'रु ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
+  const fAmt = (n) => 'Rs ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
   
   async function callBackend(action, params = {}) {
     const url = new URL(API_BASE);
@@ -1513,7 +1513,7 @@
       data: {
         labels: ['Branch Accounts', 'LRD Accounts'],
         datasets: [{
-          label: 'Outstanding Sum (रु)',
+          label: 'Outstanding Sum (Rs)',
           data: [branchSum, lrdSum],
           backgroundColor: ['#1A3B5C', '#C9A227'],
           borderRadius: 8

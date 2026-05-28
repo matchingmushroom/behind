@@ -668,51 +668,21 @@ html[data-theme="dark"] .icon-only-btn {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  border-left: 4px solid var(--success);
   cursor: pointer;
   background: var(--surface-glass);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border: 1px solid var(--surface-glass-border);
-  border-left-width: 4px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: all var(--duration-normal) var(--ease-out);
   animation: fadeSlideUp 0.4s var(--ease-out) both;
 }
 
-.customer-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(135deg, transparent 60%, hsla(var(--success-h), var(--success-s), var(--success-l), 0.04));
-  pointer-events: none;
-}
-
 .customer-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--border-hover);
-  border-left-color: var(--success);
-}
-
-.customer-card.npa-status {
-  border-left-color: var(--danger);
-}
-.customer-card.npa-status::before {
-  background: linear-gradient(135deg, transparent 60%, hsla(var(--danger-h), var(--danger-s), var(--danger-l), 0.04));
-}
-.customer-card.wl-status {
-  border-left-color: var(--warning);
-}
-.customer-card.wl-status::before {
-  background: linear-gradient(135deg, transparent 60%, hsla(var(--warning-h), var(--warning-s), var(--warning-l), 0.04));
-}
-.customer-card.pass-status {
-  border-left-color: var(--success);
-}
-.customer-card.pass-status::before {
-  background: linear-gradient(135deg, transparent 60%, hsla(var(--success-h), var(--success-s), var(--success-l), 0.04));
 }
 
 .card-top {
@@ -741,14 +711,6 @@ html[data-theme="dark"] .icon-only-btn {
   font-size: 14px;
   flex-shrink: 0;
   box-shadow: var(--shadow-xs);
-}
-
-.customer-card.npa-status .card-avatar {
-  background: linear-gradient(135deg, var(--danger) 0%, hsl(var(--danger-h), var(--danger-s), calc(var(--danger-l) + 8%)) 100%);
-}
-.customer-card.wl-status .card-avatar {
-  background: linear-gradient(135deg, var(--warning) 0%, hsl(var(--warning-h), var(--warning-s), calc(var(--warning-l) + 8%)) 100%);
-  color: #000;
 }
 
 .card-name {
@@ -823,9 +785,7 @@ html[data-theme="dark"] .icon-only-btn {
   transition: color var(--duration-fast) var(--ease-out);
 }
 
-.metric-val.high-ovd {
-  color: var(--danger);
-}
+
 
 /* Bulk Action Floating Bar */
 .bulk-floating-bar {
@@ -1010,7 +970,7 @@ html[data-theme="dark"] .icon-only-btn {
 }
 
 .badge-act-pass, .badge-prob-pass { background: #059669; color: white; }
-.badge-act-wl, .badge-prob-wl { background: #B45309; color: white; }
+.badge-act-wl, .badge-prob-wl { background: #EAB308; color: #000; }
 .badge-act-npa, .badge-prob-npa { background: #DC2626; color: white; }
 
 .detail-hero-actions {

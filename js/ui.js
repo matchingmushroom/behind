@@ -31,7 +31,7 @@ window.alert = function(message) {
 
 const NEPALI_MONTHS = ["Baisakh","Jestha","Ashadh","Shrawan","Bhadra","Ashwin","Kartik","Mangsir","Poush","Magh","Falgun","Chaitra"];
 
-const fAmt = (n) => 'रु ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
+const fAmt = (n) => 'Rs ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
 
 const toggleLoader = (show) => document.getElementById('loader').classList.toggle('hidden', !show);
 
