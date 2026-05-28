@@ -1656,10 +1656,11 @@ html[data-theme="dark"] .tab-slider-btn.active {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1100;
-  padding: 20px;
+  padding: 40px 20px 20px;
+  overflow-y: auto;
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--duration-normal) var(--ease-out),
@@ -1679,9 +1680,9 @@ html[data-theme="dark"] .tab-slider-btn.active {
   max-width: 480px;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-default);
-  max-height: 90vh;
+  max-height: calc(100vh - 60px);
   overflow-y: auto;
-  transform: translateY(40px) scale(0.96);
+  transform: translateY(20px) scale(0.97);
   transition: transform var(--duration-normal) var(--ease-spring),
               background var(--duration-normal) var(--ease-in-out);
 }
