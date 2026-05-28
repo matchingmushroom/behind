@@ -170,9 +170,8 @@ async function triggerFuzzySearch(query) {
   const recBox = document.getElementById('recentSearchesBox');
   
   if (!query) {
-    resGrid.innerHTML = '';
-    recBox.classList.remove('hidden');
-    renderRecentChipList();
+    await renderSearchResultsGrid(customers.slice(0, 15));
+    recBox.classList.add('hidden');
     return;
   }
   
