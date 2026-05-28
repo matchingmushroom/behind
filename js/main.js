@@ -19,30 +19,48 @@ async function loadInitialCachedLedgers() {
 }
 
 async function syncLedgerDataOnStart() {
-  if (!navigator.onLine) return;
+  if (!navigator.onLine) {
+    const cachedList = await crmDb.getAll('customers');
+    if (cachedList.length > 0) {
+      customers = cachedList;
+      triggerFuzzySearch(document.getElementById('searchInp')?.value || '');
+    }
+    return;
+  }
   await loadCustomerListLegacy();
 }
 
 async function loadCustomerListLegacy() {
   toggleLoader(true);
+  
+  const cachedList = await crmDb.getAll('customers');
+  if (cachedList.length > 0) {
+    customers = cachedList;
+    triggerFuzzySearch(document.getElementById('searchInp')?.value || '');
+  }
+  
+  if (!navigator.onLine) {
+    toggleLoader(false);
+    return;
+  }
+  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
     const data = await callBackend('customers', {}, controller.signal);
     clearTimeout(timeoutId);
-    customers = data;
-    await crmDb.clearStore('customers');
-    for(const c of data) {
-      await crmDb.put('customers', c);
+    if (Array.isArray(data) && data.length > 0) {
+      customers = data;
+      await crmDb.clearStore('customers');
+      for(const c of data) {
+        await crmDb.put('customers', c);
+      }
+      showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
     }
-    showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
   } catch(e) {
     clearTimeout(timeoutId);
-    const cachedList = await crmDb.getAll('customers');
-    if (cachedList.length > 0) {
-      customers = cachedList;
-    } else {
-      showToast('Could not load base ledger right now.', 'error');
+    if (customers.length === 0) {
+      showToast('Server unreachable. Operating with cached data.', 'warning');
     }
   } finally {
     toggleLoader(false);

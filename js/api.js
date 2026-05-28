@@ -20,6 +20,7 @@ async function callBackend(action, params = {}, signal) {
   
   const promise = (async () => {
     const response = await fetch(url.toString(), { signal });
+    if (!response.ok) throw new Error(`API ${response.status}`);
     return await response.json();
   })();
   _pendingRequests[key] = promise;
