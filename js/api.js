@@ -6,7 +6,7 @@ const API_BASE = (() => {
 })();
 
 const _pendingRequests = {};
-async function callBackend(action, params = {}) {
+async function callBackend(action, params = {}, signal) {
   const key = action + '|' + JSON.stringify(params);
   if (_pendingRequests[key]) return _pendingRequests[key];
 
@@ -19,7 +19,7 @@ async function callBackend(action, params = {}) {
   });
   
   const promise = (async () => {
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), { signal });
     return await response.json();
   })();
   _pendingRequests[key] = promise;
@@ -38,14 +38,18 @@ async function getCachedExtraDetails(cifId, maxAgeMs = 15 * 60 * 1000) {
     return cached;
   }
   if (!navigator.onLine) return cached || null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
-    const data = await callBackend('extraDetails', { cifId });
+    const data = await callBackend('extraDetails', { cifId }, controller.signal);
+    clearTimeout(timeoutId);
     if (data) {
       data._cachedAt = Date.now();
       await crmDb.putKV('contact_' + cifId, data);
     }
     return data;
   } catch (e) {
+    clearTimeout(timeoutId);
     return cached || null;
   }
 }
@@ -63,14 +67,18 @@ async function getCachedInsights(cifId, apiAction, cacheKey) {
     return cached;
   }
   if (!navigator.onLine) return cached || null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
-    const data = await callBackend(apiAction, { cifId });
+    const data = await callBackend(apiAction, { cifId }, controller.signal);
+    clearTimeout(timeoutId);
     if (data) {
       data._cachedAt = Date.now();
       await crmDb.putKV(cacheKey + '_' + cifId, data);
     }
     return data;
   } catch (e) {
+    clearTimeout(timeoutId);
     return cached || null;
   }
 }

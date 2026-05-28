@@ -14,12 +14,16 @@ async function loadDetails() {
       toggleLoader(false);
       return;
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
-      const m = await callBackend('metrics', { cifId: currentCIF });
+      const m = await callBackend('metrics', { cifId: currentCIF }, controller.signal);
+      clearTimeout(timeoutId);
       toggleLoader(false);
       await crmDb.put('metrics', m);
       renderMetrics(m);
     } catch (err) {
+      clearTimeout(timeoutId);
       toggleLoader(false);
       if (!cached) showToast("Failed to retrieve metrics from NIC ASIA servers.", 'error');
     }
@@ -75,8 +79,16 @@ async function renderMetrics(m) {
     
     try {
       const c = await getCachedExtraDetails(currentCIF);
+      
+      if (!c) { 
+        grid.innerHTML = "<div class='contact-card-premium' style='grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;font-size:13px;'>No contact details recorded</div>"; 
+        window.currentCustomer.primaryPhone = '';
+        window.currentCustomer.secondaryPhone = '';
+        return; 
+      }
+      
       function formatPhones(str) { 
-        if (!str) return '-'; 
+        if (!str) return '<span style="color:var(--text-muted);font-size:12px;">No phone</span>'; 
         return str.split(';').filter(p=>p.trim()).map(p => `
           <div class="contact-phone-item">
             <a href="tel:${p}">${p}</a>
@@ -87,14 +99,6 @@ async function renderMetrics(m) {
           </div>`).join(''); 
       }
       
-      if (!c) { 
-        grid.innerHTML = "<div class='contact-card-premium' style='grid-column:1/-1;'>No contact details recorded</div>"; 
-        window.currentCustomer.primaryPhone = '';
-        window.currentCustomer.secondaryPhone = '';
-        return; 
-      }
-      
-      // Ensure account number is ALWAYS fetched and NOT saved/stored locally
       window.currentCustomer.primaryPhone = (c.Contact_No || '').split(';')[0]?.trim() || '';
       window.currentCustomer.secondaryPhone = (c.Additional_Contact_Number || '').split(';')[0]?.trim() || '';
       
@@ -125,7 +129,7 @@ async function renderMetrics(m) {
       }
       grid.innerHTML = html;
     } catch(e) {
-      grid.innerHTML = "<div class='contact-card-premium' style='grid-column:1/-1;'>Contact details not loaded offline</div>";
+      grid.innerHTML = "<div class='contact-card-premium' style='grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;font-size:13px;'>Contact details not loaded offline</div>";
       window.currentCustomer.primaryPhone = '';
       window.currentCustomer.secondaryPhone = '';
     }

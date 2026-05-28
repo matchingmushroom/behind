@@ -25,8 +25,11 @@ async function syncLedgerDataOnStart() {
 
 async function loadCustomerListLegacy() {
   toggleLoader(true);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
   try {
-    const data = await callBackend('customers');
+    const data = await callBackend('customers', {}, controller.signal);
+    clearTimeout(timeoutId);
     customers = data;
     await crmDb.clearStore('customers');
     for(const c of data) {
@@ -34,6 +37,7 @@ async function loadCustomerListLegacy() {
     }
     showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
   } catch(e) {
+    clearTimeout(timeoutId);
     const cachedList = await crmDb.getAll('customers');
     if (cachedList.length > 0) {
       customers = cachedList;
