@@ -734,27 +734,6 @@ html[data-theme="dark"] .icon-only-btn {
   align-items: flex-end;
 }
 
-.card-checkbox {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  border: 2px solid var(--border-default);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--duration-fast) var(--ease-out);
-  background: var(--surface-solid);
-  color: transparent;
-}
-
-.card-checkbox.checked {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-  box-shadow: 0 2px 8px hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.25);
-}
-
 .card-body-row {
   display: flex;
   justify-content: space-between;
@@ -786,75 +765,6 @@ html[data-theme="dark"] .icon-only-btn {
 }
 
 
-
-/* Bulk Action Floating Bar */
-.bulk-floating-bar {
-  position: fixed;
-  bottom: 96px;
-  left: 50%;
-  transform: translateX(-50%) translateY(150px);
-  background: var(--surface-solid);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-full);
-  padding: 8px 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 99;
-  transition: transform var(--duration-slow) var(--ease-spring);
-}
-
-.bulk-floating-bar.active {
-  transform: translateX(-50%) translateY(0);
-}
-
-.bulk-text {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.bulk-btn {
-  background: var(--primary);
-  border: none;
-  padding: 8px 16px;
-  border-radius: var(--radius-full);
-  color: white;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
-  position: relative;
-  overflow: hidden;
-}
-
-.bulk-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.1);
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.bulk-btn:hover {
-  transform: scale(1.04);
-  box-shadow: var(--shadow-sm);
-}
-.bulk-btn:hover::after { opacity: 1; }
-
-.bulk-btn.cancel {
-  background: transparent;
-  border: 1px solid var(--border-default);
-  color: var(--text-muted);
-}
-
-.bulk-btn.cancel::after { display: none; }
-.bulk-btn.cancel:hover {
-  background: var(--border-subtle);
-  color: var(--text-primary);
-}
 
 /* ── 9. CUSTOMER DETAIL VIEW ─────────────── */
 
@@ -2236,11 +2146,6 @@ html[data-theme="dark"] .segmented-btn.active {
     padding: 20px;
   }
 
-  /* Bulk bar full width */
-  .bulk-floating-bar {
-    width: calc(100% - 32px);
-    justify-content: center;
-  }
 }
 
 /* ── 21. EXTRA SMALL (≤ 380px) ──────────── */

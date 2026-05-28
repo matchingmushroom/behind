@@ -149,7 +149,6 @@ async function loadLocalDetailPortfolioTable() {
 // REALTIME DEBOUNCED FUZZY SEARCH logic
 // ==========================================
 let searchDebounceTimer = null;
-let bulkSelectedCIFs = new Set();
 
 function setupSearch() {
   const inp = document.getElementById('searchInp');
@@ -247,7 +246,6 @@ async function renderSearchResultsGrid(list) {
     card.className = `glass-card customer-card ${lowerCat}-status-card ${lowerCat}-status`;
     card.style.animationDelay = '0.05s';
     
-    const isChecked = bulkSelectedCIFs.has(c.id);
     const initial = (c.name || 'CS').substring(0, 2).toUpperCase();
     
     card.innerHTML = `
@@ -260,9 +258,6 @@ async function renderSearchResultsGrid(list) {
           </div>
         </div>
         <div class="card-badge-container">
-          <div class="card-checkbox ${isChecked ? 'checked' : ''}" onclick="toggleBulkSelect(event, '${c.id}')">
-            ${isChecked ? '<i class="material-icons-round" style="font-size:16px;">check</i>' : ''}
-          </div>
           <span class="card-badge badge-premium badge-${lowerCat === 'pass' ? 'act-pass' : (lowerCat === 'wl' ? 'act-wl' : 'act-npa')}" style="margin-top:6px;">${cat}</span>
         </div>
       </div>
@@ -272,8 +267,7 @@ async function renderSearchResultsGrid(list) {
       </div>
     `;
     
-    card.onclick = (e) => {
-      if (e.target.closest('.card-checkbox')) return;
+    card.onclick = () => {
       saveRecentSearch(c.id, c.name);
       currentCIF = c.id;
       navTo('detail');
@@ -283,73 +277,7 @@ async function renderSearchResultsGrid(list) {
   }
 }
 
-function toggleBulkSelect(event, cifId) {
-  event.stopPropagation();
-  if (bulkSelectedCIFs.has(cifId)) bulkSelectedCIFs.delete(cifId);
-  else bulkSelectedCIFs.add(cifId);
-  
-  const box = event.currentTarget;
-  box.classList.toggle('checked');
-  box.innerHTML = box.classList.contains('checked') ? '<i class="material-icons-round" style="font-size:16px;">check</i>' : '';
-  
-  updateBulkBar();
-}
 
-function updateBulkBar() {
-  const bar = document.getElementById('bulkBar');
-  const txt = document.getElementById('bulkCountText');
-  if (bulkSelectedCIFs.size > 0) {
-    txt.innerText = `${bulkSelectedCIFs.size} Account${bulkSelectedCIFs.size !== 1 ? 's' : ''} Selected`;
-    bar.classList.add('active');
-  } else {
-    bar.classList.remove('active');
-  }
-}
-
-function clearBulkSelection() {
-  bulkSelectedCIFs.clear();
-  document.querySelectorAll('.card-checkbox').forEach(box => {
-    box.classList.remove('checked');
-    box.innerHTML = '';
-  });
-  updateBulkBar();
-}
-
-async function copyBulkReminders() {
-  const textList = [];
-  for (const cifId of bulkSelectedCIFs) {
-    const m = await crmDb.get('metrics', cifId);
-    if (m) {
-      const text = `Account Name: ${m.CUSTOMER_NAME}\nNet Overdue: ${fAmt(m.TOTAL_OVERDUE_NET)}\nOverdue Days: ${m.MAX_OVD_DAYS}\n`;
-      textList.push(text);
-    }
-  }
-  if (textList.length === 0) return;
-  navigator.clipboard.writeText(textList.join('\n---\n')).then(() => {
-    showToast('Consolidated bulk reminders copied to clipboard', 'success');
-    clearBulkSelection();
-  });
-}
-
-async function sendBulkWhatsApp() {
-  const cifs = Array.from(bulkSelectedCIFs);
-  const m = await crmDb.get('metrics', cifs[0]);
-  if (!m) return;
-  
-  const extra = await getCachedExtraDetails(cifs[0]);
-  const phone = extra ? (extra.Contact_No || '').split(';')[0]?.trim() : '';
-  if (!phone) {
-    showToast(`No contact number recorded for ${m.CUSTOMER_NAME}. Bulk WhatsApp cancelled.`, 'error');
-    return;
-  }
-  
-  const text = encodeURIComponent(`Dear Customer, this is a gentle reminder that your loan account overdue balance clearance is pending. Kindly coordinate clearance. Thank you.`);
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
-  const fullPhone = cleanPhone.startsWith('977') ? cleanPhone : '977' + cleanPhone;
-  window.open(`https://wa.me/${fullPhone}?text=${text}`, '_blank');
-  
-  clearBulkSelection();
-}
 
 // ==========================================
 // SUGGESTED SEARCH RECENT CHIPS
