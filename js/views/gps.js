@@ -11,6 +11,8 @@ function openGPS() {
   const modal = document.getElementById('gpsModal');
   modal.classList.remove('hidden');
   setTimeout(() => modal.classList.add('active'), 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try { google.script.host.scrollTo(0, 0); } catch(e) {}
   
   loadGpsRecords();
 }
@@ -46,6 +48,25 @@ async function loadGpsRecords() {
       document.getElementById('gpsCustName').innerText = gpsManualCustomerName;
       document.getElementById('gpsCustId').innerText = 'CIF: ' + gpsCurrentCIF + ' (Manual Lookup)';
     }
+    
+    const adminGpsList = document.getElementById('admin-gps-list');
+    if (adminGpsList) {
+      if (gpsRecords.length === 0) {
+        adminGpsList.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; padding:16px;">No active locations recorded for this customer.</div>';
+      } else {
+        adminGpsList.innerHTML = gpsRecords.map(r => `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+                      background:rgba(0,0,0,0.03); padding:10px 14px; border-radius:var(--radius-md);">
+            <span style="font-size:13px;"><b>${r.LocationType}</b> - ${r.CollateralName || 'Default'}</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-premium btn-outline" style="padding:4px 10px; font-size:11px; flex:none; width:auto;" onclick="editGpsRecordFromAdmin(${r.rowIndex})">✎ Edit</button>
+              <button class="btn-premium" style="padding:4px 10px; font-size:11px; background:var(--danger); flex:none; width:auto;" onclick="deleteGpsRecordFromAdmin(${r.rowIndex})">🗑 Delete</button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+    
     toggleLoader(false);
   } catch (e) {
     toggleLoader(false);

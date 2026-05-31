@@ -7,6 +7,8 @@ async function openShareModal() {
   const modal = document.getElementById('shareModal');
   modal.classList.remove('hidden');
   setTimeout(() => modal.classList.add('active'), 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try { google.script.host.scrollTo(0, 0); } catch(e) {}
   
   toggleLoader(true);
   try {
@@ -64,6 +66,8 @@ async function openReminderPopup() {
   const modal = document.getElementById('reminderModal');
   modal.classList.remove('hidden');
   setTimeout(() => modal.classList.add('active'), 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try { google.script.host.scrollTo(0, 0); } catch(e) {}
   
   updatePreview();
   

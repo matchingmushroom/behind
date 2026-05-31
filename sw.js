@@ -92,7 +92,7 @@ self.addEventListener('fetch', event => {
   // Handle static assets (Stale-While-Revalidate)
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request).then(cachedResponse => {
+      return cache.match(event.request, { ignoreSearch: true }).then(cachedResponse => {
         const fetchPromise = fetch(event.request)
           .then(networkResponse => {
             if (networkResponse && networkResponse.status === 200) {
@@ -103,7 +103,7 @@ self.addEventListener('fetch', event => {
           .catch(err => {
             // Offline fallbacks
             if (event.request.headers.get('accept')?.includes('text/html')) {
-              return cache.match('/index.html') || cache.match('/');
+              return cache.match('./index.html') || cache.match('./') || cache.match('/');
             }
             return new Response('Content offline and unavailable.', {
               status: 503,

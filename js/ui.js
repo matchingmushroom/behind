@@ -31,9 +31,41 @@ window.alert = function(message) {
 
 const NEPALI_MONTHS = ["Baisakh","Jestha","Ashadh","Shrawan","Bhadra","Ashwin","Kartik","Mangsir","Poush","Magh","Falgun","Chaitra"];
 
-const fAmt = (n) => 'Rs ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
+const fAmt = (n) => 'Rs. ' + (Math.abs(n) <= 0.0001 ? "0.00" : parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}));
 
-const toggleLoader = (show) => document.getElementById('loader').classList.toggle('hidden', !show);
+function adjustFontSizeToFit(element) {
+  if (!element) return;
+  element.style.whiteSpace = 'nowrap';
+  const text = element.innerText || element.textContent;
+  const len = text.length;
+  const isKpi = element.classList.contains('kpi-val');
+  const baseSize = isKpi ? 20 : 22;
+  let size = baseSize;
+  if (len > 18) {
+    size = baseSize * 0.65;
+  } else if (len > 15) {
+    size = baseSize * 0.75;
+  } else if (len > 12) {
+    size = baseSize * 0.85;
+  }
+  element.style.fontSize = size + 'px';
+}
+
+let loaderTimeout = null;
+const toggleLoader = (show) => {
+  const loader = document.getElementById('loader');
+  if (!loader) return;
+  if (show) {
+    loader.classList.remove('hidden');
+    if (loaderTimeout) clearTimeout(loaderTimeout);
+    loaderTimeout = setTimeout(() => {
+      loader.classList.add('hidden');
+    }, 7500);
+  } else {
+    if (loaderTimeout) clearTimeout(loaderTimeout);
+    loader.classList.add('hidden');
+  }
+};
 
 function getStatusIcons(actual, probable) {
   const badges = [];
@@ -58,7 +90,11 @@ function animateMetricCounter(elementId, targetValue) {
   const el = document.getElementById(elementId);
   if (!el) return;
   const target = parseFloat(targetValue) || 0;
-  if (target === 0) { el.innerText = fAmt(0); return; }
+  if (target === 0) { 
+    el.innerText = fAmt(0); 
+    adjustFontSizeToFit(el);
+    return; 
+  }
   const duration = 800;
   const startTime = performance.now();
   const startVal = 0;
@@ -68,6 +104,7 @@ function animateMetricCounter(elementId, targetValue) {
     const eased = 1 - Math.pow(1 - progress, 3);
     const currentVal = startVal + (target - startVal) * eased;
     el.innerText = fAmt(currentVal);
+    adjustFontSizeToFit(el);
     if (progress < 1) requestAnimationFrame(step);
   }
   requestAnimationFrame(step);
@@ -108,5 +145,9 @@ function updateThemeIcon() {
 }
 
 function openDashboard() {
-  window.location.href = 'Dashboard.html';
+  window.location.href = '?page=dashboard';
+}
+
+function openAdminPage() {
+  window.location.href = '?page=admin';
 }

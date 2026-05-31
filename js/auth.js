@@ -76,10 +76,16 @@ function showMainAppDashboard() {
 
 function handleUrlParams() {
   const params = new URLSearchParams(window.location.search);
-  const cifParam = params.get('cif');
+  let cifParam = params.get('cif');
+  if (!cifParam) {
+    cifParam = sessionStorage.getItem('selectedCIF');
+  }
   if (cifParam) {
     currentCIF = cifParam;
-    navTo('detail');
+    sessionStorage.setItem('selectedCIF', cifParam);
+    if (typeof navTo === 'function') {
+      navTo('detail');
+    }
   }
 }
 
@@ -127,6 +133,8 @@ function openCommitmentModal() {
   const modal = document.getElementById('commitmentModal');
   modal.classList.remove('hidden');
   setTimeout(() => modal.classList.add('active'), 50);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try { google.script.host.scrollTo(0, 0); } catch(e) {}
 }
 
 function closeCommitmentModal() {

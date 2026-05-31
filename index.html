@@ -102,6 +102,10 @@
       <div class="header-btn" onclick="openDashboard()" title="Open Dashboard">
         <i class="material-icons-round">dashboard</i> Dashboard
       </div>
+      <!-- Admin Icon -->
+      <div class="icon-only-btn" onclick="openAdminPage()" title="Admin Portal">
+        <i class="material-icons-round">admin_panel_settings</i>
+      </div>
     </div>
   </header>
 
@@ -163,14 +167,14 @@
         
         <!-- Metrics Grid (NPA red, WL yellow) -->
         <div class="stat-grid" id="detail-metrics-grid">
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance_wallet</i><span class="stat-card-lbl">Net Overdue</span></div><div class="stat-card-val neg-val" id="v-net-ovd">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">request_quote</i><span class="stat-card-lbl">Total Overdue</span></div><div class="stat-card-val" id="v-tot-ovd">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">security</i><span class="stat-card-lbl">NPA Saver</span></div><div class="stat-card-val" id="v-npa">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">health_and_safety</i><span class="stat-card-lbl">WL Saver</span></div><div class="stat-card-val" id="v-wl">Rs 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance_wallet</i><span class="stat-card-lbl">Net Overdue</span></div><div class="stat-card-val neg-val" id="v-net-ovd">Rs. 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">request_quote</i><span class="stat-card-lbl">Total Overdue</span></div><div class="stat-card-val" id="v-tot-ovd">Rs. 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">security</i><span class="stat-card-lbl">NPA Saver</span></div><div class="stat-card-val" id="v-npa">Rs. 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">health_and_safety</i><span class="stat-card-lbl">WL Saver</span></div><div class="stat-card-val" id="v-wl">Rs. 0.00</div></div>
           <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">event_busy</i><span class="stat-card-lbl">OVD Days</span></div><div class="stat-card-val" id="v-days">0</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance</i><span class="stat-card-lbl">Total Loan</span></div><div class="stat-card-val" id="v-loan">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">savings</i><span class="stat-card-lbl">Op. Balance</span></div><div class="stat-card-val" id="v-op">Rs 0.00</div></div>
-          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">autorenew</i><span class="stat-card-lbl">Renewal</span></div><div class="stat-card-val" id="v-renewal" style="font-size:15px; text-transform:uppercase;">N/A</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">account_balance</i><span class="stat-card-lbl">Total Loan</span></div><div class="stat-card-val" id="v-loan">Rs. 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">savings</i><span class="stat-card-lbl">Op. Balance</span></div><div class="stat-card-val" id="v-op">Rs. 0.00</div></div>
+          <div class="premium-stat-card"><div class="stat-card-header"><i class="material-icons-round">autorenew</i><span class="stat-card-lbl">Renewal</span></div><div class="stat-card-val" id="v-renewal">N/A</div></div>
         </div>
         
         <!-- Timeline section removed -->
@@ -218,7 +222,7 @@
             <table id="dailyTable">
               <thead>
                 <tr>
-                  <th>Overdue Date</th>
+                  <th>English Month</th>
                   <th>Total Overdue</th>
                   <th>Interest</th>
                   <th>Principal</th>
@@ -263,6 +267,7 @@
         </div>
       </div>
     </div>
+
   </main>
 
   <nav class="bottom-nav">
@@ -292,6 +297,9 @@
         <button class="btn-premium" onclick="copyAccountInfoFromModal()"><i class="material-icons-round">content_copy</i> Copy</button>
         <button class="btn-premium" onclick="shareViaWhatsAppFromModal()"><i class="material-icons-round">chat</i> WhatsApp</button>
         <button class="btn-premium" onclick="shareViaSMSFromModal()"><i class="material-icons-round">sms</i> SMS</button>
+      </div>
+      <div class="modal-actions" style="margin-top:8px;">
+        <button class="btn-premium btn-outline" onclick="closeShareModal()" style="flex:0.5;">Cancel</button>
       </div>
     </div>
   </div>
@@ -326,6 +334,9 @@
         <button class="btn-premium" onclick="copyReminder()"><i class="material-icons-round">content_copy</i> Copy</button>
         <button class="btn-premium" onclick="sendWhatsApp()"><i class="material-icons-round">chat</i> WhatsApp</button>
         <button class="btn-premium" onclick="sendSMS()"><i class="material-icons-round">sms</i> SMS</button>
+      </div>
+      <div class="modal-actions" style="margin-top:8px;">
+        <button class="btn-premium btn-outline" onclick="closeReminder()" style="flex:0.5;">Cancel</button>
       </div>
     </div>
   </div>
@@ -408,6 +419,9 @@
       
       <div id="gpsUpdateList" class="hidden" style="margin-bottom:16px;">
         <div id="gpsUpdateItems"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-premium btn-outline" onclick="closeGpsModal()" style="flex:0.5;">Cancel</button>
       </div>
     </div>
   </div>

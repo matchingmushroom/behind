@@ -58,6 +58,8 @@ async function renderMetrics(m) {
   
   document.getElementById('v-days').innerText = m.MAX_OVD_DAYS;
   document.getElementById('v-renewal').innerText = m.RENEWAL || 'N/A';
+  adjustFontSizeToFit(document.getElementById('v-days'));
+  adjustFontSizeToFit(document.getElementById('v-renewal'));
   
   const renewalEl = document.getElementById('v-renewal');
   if ((m.RENEWAL || '').toUpperCase() === 'EXPIRED') {
@@ -79,6 +81,7 @@ async function renderMetrics(m) {
     
     try {
       const c = await getCachedExtraDetails(currentCIF);
+      populateAdminContactDetails(c);
       
       if (!c) { 
         grid.innerHTML = "<div class='contact-card-premium' style='grid-column:1/-1;text-align:center;color:var(--text-muted);padding:24px;font-size:13px;'>No contact details recorded</div>"; 
@@ -135,3 +138,5 @@ async function renderMetrics(m) {
     }
   }
 }
+
+

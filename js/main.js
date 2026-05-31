@@ -54,6 +54,9 @@ async function loadCustomerListLegacy() {
       await crmDb.clearStore('customers');
       for(const c of data) {
         await crmDb.put('customers', c);
+        if (c.metrics) {
+          await crmDb.put('metrics', c.metrics);
+        }
       }
       showToast(`Loaded ${customers.length} customer ledgers.`, 'success');
     }
@@ -253,9 +256,12 @@ async function renderSearchResultsGrid(list) {
   
   for (const c of list) {
     const card = document.createElement('div');
-    const m = await crmDb.get('metrics', c.id);
+    let m = await crmDb.get('metrics', c.id);
+    if (!m && c.metrics) {
+      m = c.metrics;
+    }
     let cat = 'Pass';
-    let netOvdVal = 'Rs 0.00';
+    let netOvdVal = 'Rs. 0.00';
     let maxOvdDaysVal = 0;
     
     if (m) {
@@ -296,6 +302,7 @@ async function renderSearchResultsGrid(list) {
     };
     
     grid.appendChild(card);
+    card.querySelectorAll('.metric-val').forEach(el => adjustFontSizeToFit(el));
   }
 }
 

@@ -26,6 +26,11 @@ function doGet(e) {
     return serveDashboard();
   }
   
+  // Route to Admin page
+  if (e?.parameter?.page === 'admin') {
+    return serveAdmin();
+  }
+  
   // Handle static files for PWA
   if (file === 'manifest') {
     const manifest = {
@@ -137,6 +142,9 @@ function doGet(e) {
           break;
         case 'deleteImage':
           result = deleteImage(e?.parameter?.fileName);
+          break;
+        case 'updateContactDetails':
+          result = updateCustomerContactDetails(e?.parameter);
           break;
         default:
           result = { error: 'Invalid action' };
@@ -276,13 +284,15 @@ function getSheetData() {
   const range = sheet.getDataRange();
   const rawValues = range.getValues();
   const displayValues = range.getDisplayValues();
-  const headers = rawValues[0].map(h => String(h).trim());
+  const headers = rawValues[0].map(h => String(h).trim().toUpperCase().replace(/\s+/g, '_'));
   const data = [];
   for (let i = 1; i < rawValues.length; i++) {
     let obj = {};
     headers.forEach((header, j) => {
-      if (["OVD_DATE", "NEPALI_OVD_Month", "NEPALI_OVD_Year", "CIF_ID", "ACCOUNT_NO", "CUSTOMER_GROUP", "RENEWAL", "CATEGORY_ACTUAL", "CATEGORY_PROBABLE"].includes(header)) {
-        obj[header] = String(displayValues[i][j]).trim();
+      if (["OVD_DATE", "NEPALI_OVD_MONTH", "NEPALI_OVD_YEAR", "CIF_ID", "ACCOUNT_NO", "CUSTOMER_GROUP", "RENEWAL", "CATEGORY_ACTUAL", "CATEGORY_PROBABLE"].includes(header)) {
+        var val = String(displayValues[i][j]).trim();
+        if (header === "CIF_ID") val = val.replace(/^0+/, '');
+        obj[header] = val;
       } else {
         obj[header] = rawValues[i][j];
       }
@@ -304,11 +314,27 @@ function preloadCache() {
 }
 
 function getCustomerList() {
+  try {
+    const full = loadFullData();
+    if (full && full.allMetrics) {
+      return full.allMetrics.map(m => {
+        return {
+          id: m.CIF_ID,
+          name: m.CUSTOMER_NAME,
+          metrics: m
+        };
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  
   const data = getSheetData();
   const lookup = new Map();
   data.forEach(row => {
-    const cif = row.CIF_ID;
-    const name = String(row.CUSTOMER_NAME || '').trim();
+    const rawCif = getRowValueInsensitive(row, 'CIF_ID');
+    const name = String(getRowValueInsensitive(row, 'CUSTOMER_NAME') || '').trim();
+    const cif = String(rawCif || '').trim().replace(/^0+/, '');
     if (cif && name && !lookup.has(cif)) {
       lookup.set(cif, { id: cif, name: name });
     }
@@ -568,6 +594,46 @@ function getGroupDetails(groupName) {
   return { summary, units };
 }
 
+function parseDateRobustly(val) {
+  if (!val) return null;
+  if (val instanceof Date) return val;
+  
+  // Try converting serial number (Excel/Google Sheets serial date)
+  var num = Number(val);
+  if (!isNaN(num) && num > 1000 && num < 100000) {
+    var d = new Date((num - 25569) * 24 * 3600 * 1000);
+    if (!isNaN(d.getTime()) && d.getFullYear() > 1900 && d.getFullYear() < 2200) return d;
+  }
+  
+  // Try standard constructor
+  var d = new Date(val);
+  if (!isNaN(d.getTime())) return d;
+  
+  // Try splitting by slash, dash or dot
+  var parts = String(val).split(/[\/\-\.]/);
+  if (parts.length === 3) {
+    var p0 = parseInt(parts[0], 10);
+    var p1 = parseInt(parts[1], 10);
+    var p2 = parseInt(parts[2], 10);
+    
+    if (p0 > 1000) {
+      d = new Date(p0, p1 - 1, p2);
+      if (!isNaN(d.getTime())) return d;
+    } else if (p2 > 1000) {
+      if (p0 > 12) {
+        d = new Date(p2, p1 - 1, p0);
+      } else {
+        d = new Date(p2, p0 - 1, p1);
+        if (isNaN(d.getTime())) {
+          d = new Date(p2, p1 - 1, p0);
+        }
+      }
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  return null;
+}
+
 function getOverdueDetails(cifId) {
   const data = getSheetData();
   const records = data.filter(r => r.CIF_ID === cifId);
@@ -592,13 +658,26 @@ function getOverdueDetails(cifId) {
     
     if (!isValid(adjustedTotOvd)) return;
     
-    let d = r.OVD_DATE;
-    if (!group[d]) group[d] = { OVD_DATE: d, TOT_OVD_AMT: 0, I_OVD: 0, P_OVD: 0, PENAL_INT: 0 };
+    let dateObj = parseDateRobustly(r.OVD_DATE);
     
-    group[d].TOT_OVD_AMT += adjustedTotOvd;
-    group[d].I_OVD += iOvd;
-    group[d].P_OVD += adjustedPOvd;
-    group[d].PENAL_INT += penal;
+    if (!dateObj || isNaN(dateObj.getTime())) {
+      return;
+    }
+    
+    const year = dateObj.getFullYear();
+    const monthIndex = dateObj.getMonth();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const monthLabel = monthNames[monthIndex] + " " + year;
+    const sortKey = year + "-" + String(monthIndex + 101).substring(1);
+    
+    if (!group[sortKey]) {
+      group[sortKey] = { OVD_DATE: monthLabel, sortKey: sortKey, TOT_OVD_AMT: 0, I_OVD: 0, P_OVD: 0, PENAL_INT: 0 };
+    }
+    
+    group[sortKey].TOT_OVD_AMT += adjustedTotOvd;
+    group[sortKey].I_OVD += iOvd;
+    group[sortKey].P_OVD += adjustedPOvd;
+    group[sortKey].PENAL_INT += penal;
     
     grandTotal.TOT_OVD_AMT += adjustedTotOvd;
     grandTotal.I_OVD += iOvd;
@@ -606,7 +685,10 @@ function getOverdueDetails(cifId) {
     grandTotal.PENAL_INT += penal;
   });
   
-  return { rows: Object.values(group), total: grandTotal };
+  const sortedRows = Object.values(group).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  sortedRows.forEach(r => delete r.sortKey);
+  
+  return { rows: sortedRows, total: grandTotal };
 }
 
 function getSlicerOptions(cifId) {
@@ -676,10 +758,97 @@ function getCustomerExtraDetails(cifId) {
   return null;
 }
 
+function getCustomerInfoData() {
+  try {
+    const fullData = loadFullData();
+    if (!fullData || !fullData.allMetrics) return [];
+    
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const customerInfoSheet = ss.getSheetByName('CustomerInfo');
+    const contactsMap = new Map();
+    if (customerInfoSheet) {
+      const ciData = customerInfoSheet.getDataRange().getDisplayValues();
+      if (ciData.length > 1) {
+        const headers = ciData[0].map(h => String(h).trim());
+        const cifIdx = headers.findIndex(h => {
+          const norm = h.toLowerCase().replace(/[\s_-]/g, '');
+          return norm === 'cifid' || norm === 'cif' || norm.indexOf('cif') !== -1;
+        });
+        const contactNoIdx = headers.findIndex(h => h.toLowerCase().replace(/[\s_-]/g, '') === 'contactno');
+        const addContactNoIdx = headers.findIndex(h => h.toLowerCase().replace(/[\s_-]/g, '') === 'additionalcontactnumber');
+        if (cifIdx !== -1) {
+          for (let i = 1; i < ciData.length; i++) {
+            const row = ciData[i];
+            const cif = String(row[cifIdx]).trim().replace(/^0+/, '');
+            contactsMap.set(cif, {
+              Contact_No: contactNoIdx !== -1 ? String(row[contactNoIdx]).trim() : '',
+              Additional_Contact_Number: addContactNoIdx !== -1 ? String(row[addContactNoIdx]).trim() : ''
+            });
+          }
+        }
+      }
+    }
+    
+    return fullData.allMetrics.map(m => {
+      const cifStr = String(m.CIF_ID).trim().replace(/^0+/, '');
+      const contactInfo = contactsMap.get(cifStr) || { Contact_No: '', Additional_Contact_Number: '' };
+      return {
+        CUSTOMER_NAME: m.CUSTOMER_NAME || 'N/A',
+        CIF_ID: m.CIF_ID,
+        OUTSTANDING_LOAN: m.OUTSTANDING_LOAN || 0,
+        CUSTOMER_GROUP: m.CUSTOMER_GROUP || 'NO GROUP',
+        Contact_No: contactInfo.Contact_No,
+        Additional_Contact_Number: contactInfo.Additional_Contact_Number
+      };
+    });
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
+}
+
+function getRowValueInsensitive(row, keyToFind) {
+  const normalizedKey = keyToFind.toLowerCase().replace(/[\s_-]/g, '');
+  for (let key in row) {
+    if (key.toLowerCase().replace(/[\s_-]/g, '') === normalizedKey) {
+      return row[key];
+    }
+  }
+  return null;
+}
+
 // ========== LOAD FULL DATA (ONE REQUEST) ==========
 function loadFullData() {
   const startTime = new Date().getTime();
   
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const customerInfoSheet = ss.getSheetByName('CustomerInfo');
+  const cifToRm = new Map();
+  if (customerInfoSheet) {
+    const ciData = customerInfoSheet.getDataRange().getDisplayValues();
+    if (ciData.length > 1) {
+      const ciHeaders = ciData[0].map(function(h) { return String(h).trim(); });
+      const cifIdx = ciHeaders.findIndex(function(h) {
+        const norm = String(h).toLowerCase().replace(/[\s_-]/g, '');
+        return norm === 'cifid' || norm === 'cif' || norm === 'cid' || norm === 'customerid' || norm.indexOf('cif') !== -1 || norm.indexOf('customer') !== -1 || norm.indexOf('accountno') !== -1 || norm.indexOf('account') !== -1;
+      });
+      const rmIdx = ciHeaders.findIndex(function(h) {
+        const norm = String(h).toLowerCase().replace(/[\s_-]/g, '');
+        return norm === 'rm' || norm === 'assignedrm' || norm === 'assignedto' || norm === 'employee' || norm === 'staffname' || norm === 'representative' || norm === 'officername' || norm.indexOf('rm') !== -1 || norm.indexOf('relationshipmanager') !== -1 || norm.indexOf('staff') !== -1 || norm.indexOf('manager') !== -1 || norm.indexOf('officer') !== -1 || norm.indexOf('assigned') !== -1 || norm.indexOf('employee') !== -1 || norm.indexOf('person') !== -1 || norm.indexOf('representative') !== -1;
+      });
+      if (cifIdx !== -1 && rmIdx !== -1) {
+        for (let i = 1; i < ciData.length; i++) {
+          const row = ciData[i];
+          const cif = String(row[cifIdx]).trim().replace(/^0+/, ''); // strip leading zeros
+          const rm = String(row[rmIdx]).trim();
+          if (cif && rm) {
+            cifToRm.set(cif, rm);
+          }
+        }
+      }
+    }
+  }
+
   const data = getSheetData();
   const criteria = getCategoryCriteria();
   
@@ -687,7 +856,7 @@ function loadFullData() {
   const groupMap = new Map();
   
   data.forEach(row => {
-    const cif = row.CIF_ID;
+    const cif = String(row.CIF_ID || '').trim().replace(/^0+/, '');
     if (!cif) return;
     
     const renewal = String(row.RENEWAL || '').trim().toUpperCase();
@@ -699,6 +868,8 @@ function loadFullData() {
         name: row.CUSTOMER_NAME || 'N/A',
         group: row.CUSTOMER_GROUP || "NO GROUP",
         renewal: renewal,
+        relationship: getRowValueInsensitive(row, 'relationship') || getRowValueInsensitive(row, 'custrelationship') || 'Branch',
+        assignedRM: cifToRm.get(String(cif).trim().replace(/^0+/, '')) || 'Unassigned',
         maxOvdDays: 0,
         maxRevOvdDays: 0,
         outstandingLoan: 0,
@@ -759,7 +930,8 @@ function loadFullData() {
         minBalWl: minBalWl,
         totOvdAmt: adjustedTotOvd,
         penalInt: penal,
-        renewal: renewal
+        renewal: renewal,
+        relationship: getRowValueInsensitive(row, 'relationship') || getRowValueInsensitive(row, 'custrelationship') || 'Branch'
       });
     }
   });
@@ -787,7 +959,8 @@ function loadFullData() {
       MIN_BAL_WL: a.minBalWl,
       TOT_OVD_AMT: a.totOvdAmt,
       PENAL_INT: a.penalInt,
-      NET_OVD: a.totOvdAmt - a.penalInt
+      NET_OVD: a.totOvdAmt - a.penalInt,
+      RELATIONSHIP: a.relationship || c.relationship || 'Branch'
     }));
     
     const totalOvdAmt = accounts.reduce((sum, a) => sum + a.TOT_OVD_AMT, 0);
@@ -797,6 +970,8 @@ function loadFullData() {
       CUSTOMER_NAME: c.name,
       CUSTOMER_GROUP: c.group,
       RENEWAL: c.renewal,
+      RELATIONSHIP: c.relationship || 'Branch',
+      ASSIGNED_RM: c.assignedRM || 'Unassigned',
       CATEGORY_ACTUAL: actualCat,
       CATEGORY_PROBABLE: probableCat,
       MAX_OVD_DAYS: c.maxOvdDays,
@@ -883,6 +1058,14 @@ function serveDashboard() {
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 }
 
+// ========== ADMIN PAGE ==========
+function serveAdmin() {
+  return HtmlService.createHtmlOutputFromFile('Admin')
+    .setTitle('Admin | Behind Schedule')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+}
+
 // ========== CATEGORY TABLE ENDPOINT ==========
 function getCustomersByCategory(category, relationship, sortBy, sortOrder, page, pageSize) {
   category = category || 'ALL';
@@ -905,7 +1088,7 @@ function getCustomersByCategory(category, relationship, sortBy, sortOrder, page,
       custMap.set(cif, {
         cifId: cif,
         name: row.CUSTOMER_NAME || 'N/A',
-        relationship: row.CUST_RELATIONSHIP || '',
+        relationship: getRowValueInsensitive(row, 'relationship') || getRowValueInsensitive(row, 'custrelationship') || '',
         maxOvdDays: 0,
         maxRevOvdDays: 0,
         outstandingLoan: 0,
@@ -952,7 +1135,8 @@ function getCustomersByCategory(category, relationship, sortBy, sortOrder, page,
 
     if (relationship !== 'ALL') {
       const custRel = (cust.relationship || '').trim().toUpperCase();
-      if (custRel !== relationship.toUpperCase()) return;
+      const filterRel = relationship.toUpperCase();
+      if (!custRel.includes(filterRel) && !filterRel.includes(custRel)) return;
     }
 
     let include = false;
@@ -1397,6 +1581,86 @@ function deleteImage(fileName) {
     return { success: true };
   } catch (e) {
     return { success: false, error: e.toString() };
+  }
+}
+
+function updateCustomerContactDetails(params) {
+  if (!params || !params.cifId) {
+    return { success: false, error: 'Missing parameters or CIF_ID' };
+  }
+  
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('CustomerInfo');
+  if (!sheet) {
+    return { success: false, error: 'CustomerInfo sheet not found' };
+  }
+  
+  const range = sheet.getDataRange();
+  const values = range.getValues();
+  if (values.length < 1) {
+    return { success: false, error: 'CustomerInfo sheet is empty' };
+  }
+  
+  const headers = values[0].map(h => String(h).trim());
+  const cifIndex = headers.indexOf('CIF_ID');
+  if (cifIndex === -1) {
+    return { success: false, error: 'CIF_ID header not found' };
+  }
+  
+  let idNoIndex = headers.indexOf('Identification_No');
+  if (idNoIndex === -1) {
+    const lastCol = headers.length;
+    sheet.getRange(1, lastCol + 1).setValue('Identification_No');
+    sheet.getRange(1, lastCol + 1).setFontWeight('bold');
+    headers.push('Identification_No');
+    idNoIndex = lastCol;
+    values.forEach((row, rIdx) => {
+      if (rIdx > 0) {
+        row.push('');
+      }
+    });
+  }
+  
+  let matchRowIndex = -1;
+  const targetCif = String(params.cifId).trim();
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][cifIndex]).trim() === targetCif) {
+      matchRowIndex = i + 1;
+      break;
+    }
+  }
+  
+  const fields = {
+    'Contact_Person_Name': params.Contact_Person_Name || '',
+    'Contact_No': params.Contact_No || '',
+    'Additional_Person': params.Additional_Person || '',
+    'Additional_Contact_Number': params.Additional_Contact_Number || '',
+    'Additional_Person_Relation': params.Additional_Person_Relation || '',
+    'Identification_No': params.Identification_No || ''
+  };
+  
+  if (matchRowIndex === -1) {
+    const newRow = new Array(headers.length).fill('');
+    newRow[cifIndex] = targetCif;
+    
+    Object.keys(fields).forEach(key => {
+      const idx = headers.indexOf(key);
+      if (idx !== -1) {
+        newRow[idx] = fields[key];
+      }
+    });
+    
+    sheet.appendRow(newRow);
+    return { success: true, message: 'New customer contact record added.' };
+  } else {
+    Object.keys(fields).forEach(key => {
+      const idx = headers.indexOf(key);
+      if (idx !== -1) {
+        sheet.getRange(matchRowIndex, idx + 1).setValue(fields[key]);
+      }
+    });
+    
+    return { success: true, message: 'Customer contact credentials updated successfully.' };
   }
 }
 
